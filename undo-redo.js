@@ -1,8 +1,9 @@
 /*
 	JS-Undo-Redo
 
-	Verion: 0.5
-	Date: 2015-02-06
+	Verion: 0.7
+	Original Publish Date: 2015-02-06
+	Latest: 2018-08-29
 
 	Author: Laszlo Szenes
 	License: MIT
@@ -14,10 +15,12 @@
 */
 
 //paramaters:
-// stacksize: how many steps we can go back
 // workObj: the object that will get saved/restored - given here once to avoid repetition
-function undoRedo(stackSize,workObj){
+// delay: time in ms, between automatic save attempts, default is 30000 (30 sec). Minus value means don't do scheduled save
+// stacksize: how many steps we can go back
+function undoRedo(workObj,delay,stackSize){
 	var stackSize=stackSize || 10;  //default is 10
+	var delay=delay || 30000
 
 	//these are the working copies of the stacks
 	//these gets saves to localStorage at every change
@@ -85,11 +88,11 @@ function undoRedo(stackSize,workObj){
 
 
 //=========helper functions
-//special `extend` which deletes arrays in the target to accomodate restoring decreasing arrays
+//special `extend` which deletes arrays elements in order to accomodate restoring decreasing arrays
 	function extend (target, source) {
 	  target = target || {};
 	  if(target.length+"" != "undefined"){ //if it's an array
-		while(target.length > 0) {  //empty the array
+		while(target.length > source.length) {  //make the two array the same length
     		target.pop();
 		}
 	  }
@@ -111,6 +114,7 @@ function undoRedo(stackSize,workObj){
 		if(what.l) L.lastSav=JSON.stringify(lastSav);
 	}
 
+	if(delay>0)	setInterval(save,delay)   
 
 	return {  //exposing the API functions
 		save: save,
